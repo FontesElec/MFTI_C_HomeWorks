@@ -1,0 +1,240 @@
+#include "temp_api.h"
+#include "limits.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//привяжем указатель на хранилище как глобальную переменную, будем определять, открыт ли .csv файл(при этом создаётся хранилище)
+static ProtectedStorage* my_storage = NULL; 
+
+ProcResult help_cmd(char* arg){
+    printf("----------------------------------------------------------------------------------------------------\n");
+    printf("COMMAND LIST:\n\n");
+    printf("(null)\tif the parameter is empty, the test program is launched\n");
+    printf("-h\t(no parameters) will open command list\n");
+    printf("-f\t(filename.csv) will open the file with data\n");
+    printf("-y\t(year) will output data on the minimum, maximum, and average temperature for the year\n");
+    printf("-m\t(month number) will output data on the minimum, maximum, and average temperature for the month\n");
+    printf("-n\t(yyyy.mm.dd;hh:mm;t) will add a new entry to the repository\n");
+    printf("-dl\t(no parameters) will delete the last entry in the repository\n");
+    printf("-d\t(yyyy.mm.dd;hh:mm) will delete a record from storage with a specific date and time\n");
+    printf("-s\t(ad/dd/at/dt) will output all storage data sorted by:\
+            \n\t* ad - ascending date\
+            \n\t* dd - descending date\
+            \n\t* at - ascending temperature\
+            \n\t* dt - descending temperature\n");
+    printf("----------------------------------------------------------------------------------------------------\n");
+    return SUCSESS;
+}
+
+ProcResult open_file_cmd(char* arg){
+    (void)arg;
+    //В дальнейшем сюда будет дописана функция открытия .csv файла
+    #warning NEED TO REALIZE OPENING .csv FILE
+    printf("opened file: %s\n", arg);
+    my_storage =  create_storage();
+    return SUCSESS;
+}
+
+ProcResult get_statistic_by_year_cmd(char* arg){
+    if(my_storage){
+        //Запускаем поиск области, в которой будем искать данные
+        long year = strtol(arg, NULL, 10);
+        //проверить на границы диапазона
+        if((year < 0) && (year >= UINT16_MAX)){
+            printf("Failed execution of finding for date: wrong year\n");
+            return FAIL;
+        }
+        DataRange y_range = find_in_year(my_storage, (Date){(uint16_t)year,0});
+        if(y_range.num_of_records == 0){
+            printf("Failed execution of finding for date: no information for this year\n");
+            return FAIL;
+        }
+        //Вывод данных за диапазон
+        int8_t min = min_temp(&y_range);
+        int8_t max = max_temp(&y_range);
+        float avg = avg_temp(&y_range);
+        printf("Statistic for year %d:\n", year);
+        printf("Minimal temeperature %d, maximal temperature %d, average temperature %0.3f\n", min, max, avg);
+        return SUCSESS;
+    }
+    //если перед получением статистики нет данных о хранилище, то завершаем работу программы
+    printf("No open file, execution terminated\n");
+    return FAIL;
+}
+ProcResult get_statistic_by_month_cmd(char* arg){
+    if(my_storage){
+        //Запускаем поиск области, в которой будем искать данные
+        long month = strtol(arg, NULL, 10);
+        #warning FOR THIS IMPLEMENTATION THE YEAR IS TAKEN AUTOMATICALLY FROM THE STORAGE
+        uint16_t year = get_the_year(my_storage);
+        //проверить на границы диапазона
+        if((month < 1) && (month > 12)){
+            printf("Failed execution of finding for date: wrong month\n");
+            return FAIL;
+        }
+        DataRange m_range = find_in_month(my_storage, (Date){year,(uint8_t)month});
+        if(m_range.num_of_records == 0){
+            printf("Failed execution of finding for date: no information for this month\n");
+            return FAIL;
+        }
+        //Вывод данных за диапазон
+        int8_t min = min_temp(&m_range);
+        int8_t max = max_temp(&m_range);
+        float avg = avg_temp(&m_range);
+        printf("Statistic for year %d and month %d:\n", year, month);
+        printf("Minimal temeperature %d, maximal temperature %d, average temperature %0.3f\n", min, max, avg);
+        return SUCSESS;
+    }
+    //если перед получением статистики нет данных о хранилище, то завершаем работу программы
+    printf("No open file, execution terminated\n");
+    return FAIL;
+}
+ProcResult add_new_entry_cmd(char* arg){
+    if(my_storage){
+        char* str_ptr = arg;
+
+        //Обработка входной строки
+        //Определяем год
+        long y = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, '.') + 1;
+
+        //Определяем месяц
+        long m = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, '.') + 1;
+
+        //Определяем день
+        long d = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, ';') + 1;
+
+        //Определяем час
+        long h = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, ':') + 1;
+
+        //Минуты
+        long min = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, ';') + 1;
+
+        //Температура 
+        long t = strtol(str_ptr, NULL, 10);
+   
+        push_to_storage(my_storage, (TempData){
+            (uint16_t)y,
+            (uint8_t)m,
+            (uint8_t)d,
+            (uint8_t)h,
+            (uint8_t)min,
+            (int8_t)t});
+
+        printf("inserted new data: %d.%d.%d; %d:%d; %d\n", y, m, d, min, t);
+        return SUCSESS;
+    }
+    //если перед получением статистики нет данных о хранилище, то завершаем работу программы
+    printf("No open file, execution terminated\n");
+    return FAIL;
+}
+ProcResult delete_last_entry_cmd(char* arg){
+    if(my_storage){
+        pull_from_storage(my_storage);
+        printf("Last entry erased\n");
+        return SUCSESS;
+    }
+    //если перед получением статистики нет данных о хранилище, то завершаем работу программы
+    printf("No open file, execution terminated\n");
+    return FAIL;
+}
+ProcResult delete_entry_cmd(char* arg){
+    if(my_storage){
+        char* str_ptr = arg;
+
+        //Обработка входной строки
+        //Определяем год
+        long y = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, '.') + 1;
+
+        //Определяем месяц
+        long m = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, '.') + 1;
+
+        //Определяем день
+        long d = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, ';') + 1;
+
+        //Определяем час
+        long h = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, ':') + 1;
+
+        //Минуты
+        long min = strtol(str_ptr, NULL, 10);
+        str_ptr = strchr(str_ptr, ';') + 1;
+
+        delete_entry(my_storage, 
+            (Date){(uint16_t)y,(uint8_t)m,(uint8_t)d},
+            (Time){(uint8_t)h,(uint8_t)min});
+
+        printf("deleted data: %d.%d.%d; %d:%d\n", y, m, d, h, min);
+        return SUCSESS;
+    }
+    //если перед получением статистики нет данных о хранилище, то завершаем работу программы
+    printf("No open file, execution terminated\n");
+    return FAIL;
+
+}
+ProcResult show_all_data_cmd(char* arg){
+    if(strcmp(arg, "ad") == 0){
+        print_all_by_date(my_storage, ASCENDING);
+        return SUCSESS;
+    }
+    if(strcmp(arg, "dd") == 0){
+        print_all_by_date(my_storage, DESCENDING);
+        return SUCSESS;
+    }
+    if(strcmp(arg, "at") == 0){
+        print_all_by_temp(my_storage, ASCENDING);
+        return SUCSESS;
+    }
+    if(strcmp(arg, "dt") == 0){
+        print_all_by_temp(my_storage, DESCENDING);
+        return SUCSESS;
+    }
+    printf("Wrong parameter entered, abort execution\n");
+    return FAIL;
+}
+
+ProcResult unknown_command_cmd(char* arg){
+    printf("UNKNOWN COMMAND, EXECUTION TERMINATED!!!\n");
+    return FAIL;
+}
+
+
+/*  Расчёт параметров независим от его вариаций, пусть это год или месяц, с точки зрения приложения это будет
+    выглядеть в виде различий диапазона расчёта.
+*/
+int8_t min_temp(const DataRange* range){
+    int8_t min_t = _I8_MAX;
+    for(uint16_t i = 0; i < range->num_of_records; i++){
+        if(read_temp_from_storage(range,i) < min_t){
+            min_t = read_temp_from_storage(range,i);
+        }
+    }
+    return min_t;
+}
+
+int8_t max_temp(const DataRange* range){
+    int8_t max_t = _I8_MIN;
+    for(uint16_t i = 0; i < range->num_of_records; i++){
+        if(read_temp_from_storage(range,i) > max_t){
+            max_t = read_temp_from_storage(range,i);
+        }
+    }
+    return max_t;
+}
+
+double avg_temp(const DataRange*  range){
+    double avg_t = 0;
+    for(uint16_t i = 0; i < range->num_of_records; i++){
+        avg_t += read_temp_from_storage(range,i);
+    }
+    avg_t /= (double)(range->num_of_records);
+    return avg_t;
+}
