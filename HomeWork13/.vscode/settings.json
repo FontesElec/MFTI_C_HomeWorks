@@ -1,0 +1,12 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "d:\\PreparedHW",
+            "binaryPath": "d:\\PreparedHW\\temp_data",
+            "binaryArgs": []
+        }
+    ],
+    "files.associations": {
+        "time.h": "c"
+    }
+}
