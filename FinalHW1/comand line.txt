@@ -1,0 +1,1 @@
+temp_data.exe -f temperature_small.csv
