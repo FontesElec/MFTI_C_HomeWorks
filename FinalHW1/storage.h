@@ -27,7 +27,7 @@ typedef struct{
  * @param num_of_records число записей в списке
  */
 typedef struct{
-    const StorageNode*       data_ptr;
+    const StorageNode*      data_ptr;
     const uint16_t          num_of_records;
 } DataRange;
 
@@ -150,4 +150,10 @@ void print_all_by_date(const ProtectedStorage* storage, SortOrder ord);
 *   @param ord      Порядок сортировки
 */
 void print_all_by_temp(const ProtectedStorage* storage, SortOrder ord); 
+
+/**
+* Выводит на печать данные за диапазон
+* @param range диапазон печати (указатель на начальный узел и число узлов для печати)
+*/
+void print_in_range(const DataRange* range);
 

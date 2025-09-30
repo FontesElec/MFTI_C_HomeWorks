@@ -11,7 +11,7 @@ struct CommandHandler handlers[] = {
     {"-y",  get_statistic_by_year_cmd},
     {"-m",  get_statistic_by_month_cmd},
     {"-n",  add_new_entry_cmd},
-    {"-l", delete_last_entry_cmd},
+    {"-l",  delete_last_entry_cmd},
     {"-d",  delete_entry_cmd},
     {"-s",  show_all_data_cmd},
     {"-t",  test_program},

@@ -83,6 +83,10 @@ ProcResult get_statistic_by_year_cmd(char* arg){
             printf("Failed execution of finding for date: no information for this year\n");
             return FAIL;
         }
+
+        //Выводим данные
+        print_in_range(&y_range);
+
         //Вывод данных за диапазон
         int8_t min = min_temp(&y_range);
         int8_t max = max_temp(&y_range);
@@ -112,6 +116,10 @@ ProcResult get_statistic_by_month_cmd(char* arg){
             printf("Failed execution of finding for date: no information for this month\n");
             return FAIL;
         }
+
+        //Выводим данные
+        print_in_range(&m_range);
+
         //Вывод данных за диапазон
         int8_t min = min_temp(&m_range);
         int8_t max = max_temp(&m_range);

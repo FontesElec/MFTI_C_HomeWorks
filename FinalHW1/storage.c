@@ -395,6 +395,22 @@ void print_all_by_temp(const ProtectedStorage* storage, SortOrder ord){
     printf("--------------------------------\n");
 }
 
+void print_in_range(const DataRange* range){
+    if(range == NULL){
+        printf("Empty range\n");
+        return;
+    }
+    const StorageNode* cur_node = range->data_ptr;
+    printf("--------------------------------\n");
+    printf("Date\t\tTime\tTemp\n");
+    for(int16_t i = 0; i < range->num_of_records; i++){
+        print_one_entry(&(cur_node->data));
+        cur_node = cur_node->next;
+    }
+
+    printf("--------------------------------\n");
+}
+
 
 
 //--------------------------------------ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ--------------------------------
