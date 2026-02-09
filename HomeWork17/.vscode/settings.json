@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "d:\\MFTI_C_HomeWorks\\HomeWork16",
+            "binaryPath": "d:\\MFTI_C_HomeWorks\\HomeWork16\\snake",
+            "binaryArgs": []
+        }
+    ]
+}
