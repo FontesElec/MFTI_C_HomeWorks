@@ -15,5 +15,9 @@
             "binaryPath": "d:\\MFTI_C_HomeWorks\\HomeWork19\\snake",
             "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "screen.h": "c",
+        "game_over.h": "c"
+    }
 }

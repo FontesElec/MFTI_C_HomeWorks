@@ -2,5 +2,5 @@
 
 activity_t game_over_page(void){
     printf("%s", "game_over\n");
-    return EXIT;
+    return FINAL;
 }

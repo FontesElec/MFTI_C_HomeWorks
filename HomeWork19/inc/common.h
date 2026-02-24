@@ -8,6 +8,7 @@ typedef enum{
     MAIN_MENU,
     GAME,
     GAME_OVER,
+    FINAL,
     EXIT,
 }activity_t;
 
@@ -24,7 +25,7 @@ typedef enum {
 
 typedef  activity_t (*function_ptr)(void);
 typedef struct Screen{
-    function_ptr activity[4];
+    function_ptr activity[5];
     uint8_t snakes;
     uint8_t speed;
     struct Snake* snake_list;

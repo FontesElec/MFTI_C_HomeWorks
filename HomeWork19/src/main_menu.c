@@ -203,7 +203,7 @@ activity_t main_menu_page(){
             case EXIT_KEY:  return EXIT;
             default: break;
         }
-        //ВВыделение нового пункта меню
+        //Выделение нового пункта меню
         attron(A_REVERSE);
         mvprintw(menu_ptr->y, menu_ptr->x, menu_ptr->text);
         attroff(A_REVERSE); 

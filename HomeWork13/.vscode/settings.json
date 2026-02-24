@@ -4,6 +4,11 @@
             "cwd": "d:\\PreparedHW",
             "binaryPath": "d:\\PreparedHW\\temp_data",
             "binaryArgs": []
+        },
+        {
+            "cwd": "d:\\MFTI_C_HomeWorks\\HomeWork13",
+            "binaryPath": "d:\\MFTI_C_HomeWorks\\HomeWork13\\temp_data",
+            "binaryArgs": []
         }
     ],
     "files.associations": {
