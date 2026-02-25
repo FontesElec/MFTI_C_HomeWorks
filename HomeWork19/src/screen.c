@@ -17,6 +17,7 @@
 extern Screen_t* myScreen;
 
 Screen_t* new_screen(void){
+    setlocale(LC_ALL, ".UTF-8");
     static Screen_t new_screen;
     myScreen = &new_screen;
     //привязка страниц игры
