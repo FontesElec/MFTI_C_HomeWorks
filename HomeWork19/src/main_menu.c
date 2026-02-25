@@ -3,6 +3,13 @@
 #include "snake.h"
 
 extern Screen_t* myScreen;
+static uint8_t ready_flg = 0;
+
+static void ready_to_play(uint8_t param){
+    //Пропускаем параметр, приходится подобное делать для унификации функции 
+    (void)param;
+    ready_flg = 1;
+}
 
 static void set_speed(uint8_t param){
     if(myScreen){
@@ -139,7 +146,7 @@ activity_t main_menu_page(){
     snake_2_mag =   (struct menu_obj){"MAGENTA",           49, 6, COLORED, COLOR_MAGENTA, &snake_2_cyan,  &snake_2_blue,  &snake_1_red,   &start_sign,    &snake_2_cyan,    s2_set_color};
     snake_2_cyan =  (struct menu_obj){"CYAN",              59, 6, COLORED, COLOR_CYAN,    &snake_2_white, &snake_2_mag,   &snake_1_red,   &start_sign,    &snake_2_white,   s2_set_color};
     snake_2_white = (struct menu_obj){"WHITE",             66, 6, COLORED, COLOR_WHITE,   &snake_2_red,   &snake_2_cyan,  &snake_1_red,   &start_sign,    &start_sign,      s2_set_color};
-    start_sign =    (struct menu_obj){"START",             1,  8, BOLD,    0,             &start_sign,    &start_sign,    &snake_2_red,   &speed_1,       NULL,             NULL};
+    start_sign =    (struct menu_obj){"START",             1,  8, BOLD,    0,             &start_sign,    &start_sign,    &snake_2_red,   &speed_1,       NULL,             ready_to_play};
 
 //=========================================================================================================================================================================================
     
@@ -152,6 +159,7 @@ activity_t main_menu_page(){
 
 //----------------------------------ACTION--------------------------------------
     
+    //отрисовка меню
     while(menu_ptr){
         if(menu_ptr->style == BOLD){
             attron(A_BOLD);
@@ -176,7 +184,8 @@ activity_t main_menu_page(){
     attroff(A_REVERSE);
     refresh();
     
-    while(1){
+    
+    while(!ready_flg){
         ch = getch();
 
         //Возвращает пункт меню в исходное состояние
@@ -200,7 +209,7 @@ activity_t main_menu_page(){
                 show_config();            
                 break;
             }
-            case EXIT_KEY:  return EXIT;
+            case EXIT_KEY:  return FINAL;
             default: break;
         }
         //Выделение нового пункта меню

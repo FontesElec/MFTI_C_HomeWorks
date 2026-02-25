@@ -1,10 +1,10 @@
 #include <inttypes.h>
 
-typedef struct{
+struct Tail{
     uint16_t tail_x;
     uint16_t tail_y;
     struct Tail* next;
-}Tail;
+};
 
 typedef enum{
     DIR_UP,
@@ -14,7 +14,7 @@ typedef enum{
 }direction_t;
 
 
-struct __attribute__ ((packed)) Snake{
+struct Snake{
     uint16_t head_x;
     uint16_t head_y;
     uint8_t color;
@@ -22,3 +22,7 @@ struct __attribute__ ((packed)) Snake{
     struct Tail* my_tail;
     struct Snake* next;
 };
+
+void init_snake(struct Snake* my_snake);
+void draw_snake(struct Snake* my_snake);
+void move_snake(struct Snake* my_snake);
