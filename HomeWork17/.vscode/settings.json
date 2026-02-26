@@ -4,6 +4,20 @@
             "cwd": "d:\\MFTI_C_HomeWorks\\HomeWork16",
             "binaryPath": "d:\\MFTI_C_HomeWorks\\HomeWork16\\snake",
             "binaryArgs": []
+        },
+        {
+            "cwd": "d:\\MFTI_C_HomeWorks\\HomeWork19",
+            "binaryPath": "d:\\MFTI_C_HomeWorks\\HomeWork19\\screen",
+            "binaryArgs": []
+        },
+        {
+            "cwd": "d:\\MFTI_C_HomeWorks\\HomeWork19",
+            "binaryPath": "d:\\MFTI_C_HomeWorks\\HomeWork19\\snake",
+            "binaryArgs": []
         }
-    ]
+    ],
+    "files.associations": {
+        "screen.h": "c",
+        "game_over.h": "c"
+    }
 }
