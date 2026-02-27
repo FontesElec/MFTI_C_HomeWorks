@@ -1,5 +1,9 @@
 #include <inttypes.h>
 
+//Границы экрана для служебной информации
+#define RIGHT_BORDER 20
+#define LOWER_BORDER 3
+
 struct Tail{
     uint16_t tail_x;
     uint16_t tail_y;
@@ -36,3 +40,5 @@ struct Snake{
 void init_snake(struct Snake* my_snake, uint8_t snake_num);
 void move_snake(struct Snake* my_snake);
 uint8_t snake_self_collision(struct Snake* my_snake);
+uint8_t snake_vs_snake_collision(struct Snake* my_snake, struct Snake* other_snake);
+uint8_t grow_snake(struct Snake* my_snake);

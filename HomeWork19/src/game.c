@@ -3,9 +3,14 @@
 #include "common.h"
 #include <time.h>
 #include <ncurses/ncurses.h>
+#include <stdlib.h>
+
+
+#define FOOD_NUMS 3
+
+const char food_symbol[] = "*";
 
 extern Screen_t* myScreen;
-static uint8_t final = 0;
 
 //Custom delay instead timeout and usleep functions
 static void c_delay_ms(double delay){
@@ -24,6 +29,48 @@ static void all_snakes_init(void){
             snake_num++;
         }
     }
+}
+
+//Раскидывание еды
+static void food_spaming(void){
+    food_t** addr_f_ptr = &(myScreen->food_list);
+    food_t** prev_addr_f_ptr = NULL;
+    for(int i = 0; i < FOOD_NUMS; i++){
+        *addr_f_ptr =  calloc(1, sizeof(food_t));
+        if(prev_addr_f_ptr){
+            (*prev_addr_f_ptr)->next_food =  *addr_f_ptr;
+        }
+        (*addr_f_ptr)->food_x = rand() % (getmaxx(stdscr) - RIGHT_BORDER);
+        (*addr_f_ptr)->food_y = rand() % (getmaxy(stdscr) - LOWER_BORDER);
+        mvprintw((*addr_f_ptr)->food_y,  (*addr_f_ptr)->food_x, food_symbol);
+        prev_addr_f_ptr = addr_f_ptr;
+        addr_f_ptr = &((*addr_f_ptr)->next_food);
+    }
+    refresh();
+}
+
+//Уничтожение еды
+static void food_destrying(food_t* del_f_ptr){
+    food_t* f_ptr = myScreen->food_list;
+    food_t* prev_food = NULL;
+    while(f_ptr){
+        if(f_ptr == del_f_ptr){
+            //если это первый элемент в списке
+            if(!prev_food){
+                myScreen->food_list = del_f_ptr->next_food;
+                free(del_f_ptr);
+            }
+            //если удаляем из середины или хвоста
+            else{
+                prev_food->next_food = del_f_ptr->next_food;
+                free(del_f_ptr);
+            }
+            return;
+        }
+        prev_food = f_ptr;
+        f_ptr = f_ptr->next_food;
+    }
+    refresh();
 }
 
 //Движение
@@ -75,28 +122,104 @@ static void change_direction(int key){
     }
 }
 
-
-//Проверка на столкновения
-static void check_self_collisions(){
+static uint8_t check_self_collisions(){
+    uint8_t collisions = 0;
     struct Snake* s_ptr = myScreen->snake_list;
     while(s_ptr){
-        snake_self_collision(s_ptr);
+        collisions = collisions | snake_self_collision(s_ptr);
         s_ptr = s_ptr->next;
     }
+    return collisions;
 }
 
+static uint8_t was_food_eaten(void){
+    food_t* f_ptr = myScreen->food_list;
+    struct Snake* s_ptr = myScreen->snake_list;
+    uint8_t at_least_one_eaten = 0;
+    while(f_ptr){
+        uint8_t was_eaten = 0;
+        while(s_ptr){
+            if((s_ptr->head_x == f_ptr->food_x) && (s_ptr->head_y == f_ptr->food_y)){
+                grow_snake(s_ptr);
+                was_eaten = 1;
+            }
+            s_ptr = s_ptr->next;
+        }
+        if(was_eaten){
+            at_least_one_eaten = 1;
+            food_t* del_f_ptr = f_ptr;
+            f_ptr = f_ptr->next_food;
+            food_destrying(del_f_ptr);
+        }
+        else{
+            f_ptr = f_ptr->next_food;
+        }
+        s_ptr = myScreen->snake_list;
+    }
+    return at_least_one_eaten;
+}
+
+//Проверка на столкновения
+static uint8_t check_collisions(void){
+    uint8_t collisions = 0;
+    collisions = collisions  | check_self_collisions();
+    collisions = collisions  | snake_vs_snake_collision(myScreen->snake_list, myScreen->snake_list->next);
+    collisions = collisions  | snake_vs_snake_collision(myScreen->snake_list->next, myScreen->snake_list); 
+    collisions = collisions  | was_food_eaten();
+    return collisions;
+}
+
+//Отрисовка поля очков
+static void points_drawing(void){
+    uint16_t y = 1, x = getmaxx(stdscr) - RIGHT_BORDER + 3, cntr = 1;;
+    mvvline(0, getmaxx(stdscr) - RIGHT_BORDER + 1, '|', getmaxy(stdscr));
+    mvprintw(y,  x, "SCORES:");
+    struct Snake* s_ptr = myScreen->snake_list;
+    y +=2;
+    while(s_ptr){
+        mvprintw(y, x, "Snake %d:        ", cntr); //Затирает предыдущее значение
+        mvprintw(y, x, "Snake %d:  %d", cntr ,s_ptr->points);
+        y++;
+        cntr++;
+        s_ptr = s_ptr->next;
+    }
+
+}
+
+//Отрисовка подсказки по меню
+static void hints_drawing(void){
+    mvhline(getmaxy(stdscr) - LOWER_BORDER + 1, 0,'_', getmaxx(stdscr));
+    mvprintw(getmaxy(stdscr) - LOWER_BORDER + 2, 1, "Use arrows or 'WASD' nj contol snakes, press 'Q' to finish game, press 'F10' to exit game");
+}
 
 
 activity_t game_page(void){
     clear();
     nodelay(stdscr, TRUE);
     all_snakes_init();
+    hints_drawing();
+    points_drawing();
+    food_spaming();
+    
     int ch = 0;
 
-    while(!final){
-        
+    while(1){ 
         all_snakes_moving();
-        check_self_collisions();
+        struct Snake* s_ptr = myScreen->snake_list;
+        if(check_collisions()){
+            //Игра заканчивается, когда очки падают до нуля
+            while(s_ptr){
+                if(s_ptr->points == 0){
+                    return GAME_OVER;
+                }
+                s_ptr = s_ptr->next;
+            }
+            points_drawing();
+            //Обновляем еду если закончилась
+            if(myScreen->food_list == NULL){
+                food_spaming();
+            }            
+        }
         ch = getch();
 
         switch (ch){

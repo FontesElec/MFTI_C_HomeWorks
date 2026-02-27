@@ -72,7 +72,7 @@ static void coords_moving_up(uint16_t* x_addr, uint16_t* y_addr){
     (void)x_addr;
     //Защита от выхода за пределы экрана
     if((*y_addr) == 0){
-        (*y_addr) = getmaxy(stdscr);
+        (*y_addr) = getmaxy(stdscr) - LOWER_BORDER;
         return;
     }
     (*y_addr)--;
@@ -81,7 +81,7 @@ static void coords_moving_up(uint16_t* x_addr, uint16_t* y_addr){
 static void coords_moving_down(uint16_t* x_addr, uint16_t* y_addr){
     (void)x_addr;
     //Защита от выхода за пределы экрана
-    if((*y_addr) == getmaxy(stdscr)){
+    if((*y_addr) == getmaxy(stdscr) - LOWER_BORDER){
         (*y_addr) = 0;
         return;
     }
@@ -92,7 +92,7 @@ static void coords_moving_left(uint16_t* x_addr, uint16_t* y_addr){
     (void)y_addr;
     //Защита от выхода за пределы экрана
     if((*x_addr == 0)){
-        (*x_addr) = getmaxx(stdscr);
+        (*x_addr) = getmaxx(stdscr) - RIGHT_BORDER;
         return;
     }
     (*x_addr)--;
@@ -101,17 +101,15 @@ static void coords_moving_left(uint16_t* x_addr, uint16_t* y_addr){
 static void coords_moving_right(uint16_t* x_addr, uint16_t* y_addr){
     (void)y_addr;
     //Защита от выхода за пределы экрана
-    if((*x_addr) == getmaxx(stdscr)){
+    if((*x_addr) == getmaxx(stdscr) - RIGHT_BORDER){
         (*x_addr) = 0;
         return;
     }
     (*x_addr)++;
 }
 
-void move_snake(struct Snake* my_snake){
-    uint16_t x_prev = my_snake->head_x, y_prev = my_snake->head_y;
-
-    //Поворот головы
+static void move_head(struct Snake* my_snake){
+    //Движение головы
     switch(my_snake->direction){
         case DIR_UP:    coords_moving_up(&(my_snake->head_x), &(my_snake->head_y)); break;
         case DIR_DOWN:  coords_moving_down(&(my_snake->head_x), &(my_snake->head_y)); break;
@@ -119,7 +117,12 @@ void move_snake(struct Snake* my_snake){
         case DIR_RIGHT: coords_moving_right(&(my_snake->head_x), &(my_snake->head_y)); break;
         case NO_DIR: break;
     }
+}
 
+void move_snake(struct Snake* my_snake){
+    uint16_t x_prev = my_snake->head_x, y_prev = my_snake->head_y;
+    move_head(my_snake);
+   
     //Отрисовка головы
     attron(COLOR_PAIR(my_snake->color));
     mvprintw(my_snake->head_y, my_snake->head_x, my_snake->head_symbol);
@@ -172,3 +175,62 @@ uint8_t snake_self_collision(struct Snake* my_snake){
     }
     return 0;
 }
+
+uint8_t snake_vs_snake_collision(struct Snake* my_snake, struct Snake* other_snake){
+    //лобовое столкновение
+    if((my_snake->head_x == other_snake->head_x) && (my_snake->head_y == other_snake->head_y)){
+        if(my_snake->points > other_snake->points){
+            my_snake->points -= other_snake->points;
+            other_snake->points = 0;
+        }
+        else{
+            other_snake->points -= my_snake->points;
+            my_snake->points = 0;
+        }
+        return 1;
+    }
+    //наша змея пересекает хвост другой
+    struct Tail* t_ptr = other_snake->my_tail;
+    struct Tail* prev_t_ptr = NULL;
+    while(t_ptr){
+        if((my_snake->head_x == t_ptr->tail_x) && (my_snake->head_y == t_ptr->tail_y)){
+            //Затираем ссылку на следующий сегмент
+            if(prev_t_ptr){
+                prev_t_ptr->next = NULL;
+            }
+            //Уничтожаем отрезанный хвост
+            while(t_ptr){
+                mvprintw(t_ptr->tail_y, t_ptr->tail_x, " ");
+                if(other_snake->points > 0){
+                    other_snake->points--;
+                    my_snake->points++;
+                }
+                prev_t_ptr = t_ptr;
+                t_ptr = t_ptr->next;
+                free(prev_t_ptr);                
+            }
+            return 1;
+        }
+        prev_t_ptr = t_ptr;
+        t_ptr = t_ptr->next;
+    }
+    return 0;
+}
+
+uint8_t grow_snake(struct Snake* my_snake){
+    my_snake->points++;
+    uint16_t new_x = my_snake -> head_x, new_y = my_snake -> head_y;
+    //смещаем голову
+    move_head(my_snake);
+    //на её место вставляем новый сегмент
+    struct Tail* new_seg = calloc(1, sizeof(struct Tail));
+    new_seg->next = my_snake->my_tail;
+    my_snake->my_tail = new_seg;
+    new_seg->tail_x = new_x;
+    new_seg->tail_y = new_y;
+    attron(COLOR_PAIR(my_snake->color));
+    mvprintw(new_y, new_x, my_snake->tail_symbol);
+    attroff(COLOR_PAIR(my_snake->color));
+}
+
+#warning TAIL DESTRUCTION NEEDED

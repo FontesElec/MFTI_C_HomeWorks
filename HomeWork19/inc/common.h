@@ -12,7 +12,6 @@ typedef enum{
     EXIT,
 }activity_t;
 
-
 typedef enum {
     EXIT_KEY = KEY_F(10),
     ACK_KEY = 10,
@@ -23,11 +22,18 @@ typedef enum {
     LEFT_KEY = KEY_LEFT
 } menu_keys_t;
 
+typedef struct food_t{
+    uint16_t food_x;
+    uint16_t food_y;
+    struct food_t* next_food;
+}food_t;
+
 typedef  activity_t (*function_ptr)(void);
 typedef struct Screen{
     function_ptr activity[5];
     uint8_t snakes;
     uint8_t speed;
     struct Snake* snake_list;
+    struct food_t* food_list;
 } Screen_t;
 

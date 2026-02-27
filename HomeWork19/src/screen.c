@@ -1,11 +1,4 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <ncurses/ncurses.h>
-#include <inttypes.h>
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h> // for toupper()
 #include <locale.h>
 #include "screen.h"
 #include "snake.h"
