@@ -6,6 +6,7 @@
 #include "main_menu.h"
 #include "game.h"
 #include "game_over.h"
+#include "final.h"
 
 extern Screen_t* myScreen;
 
@@ -28,10 +29,3 @@ Screen_t* new_screen(void){
     new_screen.snake_list->next = calloc(1, sizeof(struct Snake));
     return &new_screen;
 }
-
-activity_t screen_destruction(void){
-    //сюда добавить деинициализацию всех динамически создаваемых объектов
-    #warning NEED TO WRITE REALISATION
-    return EXIT;
-}
-

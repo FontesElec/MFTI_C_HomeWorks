@@ -1,7 +1,7 @@
 all: snake
 
-snake: src/main.o src/screen.o src/snake.o src/greetings.o src/main_menu.o src/common.o src/game.o src/game_over.o
-	gcc src/main.o src/screen.o src/snake.o src/greetings.o src/main_menu.o  src/common.o src/game.o src/game_over.o -o snake -lncurses
+snake: src/main.o src/screen.o src/snake.o src/greetings.o src/main_menu.o src/common.o src/game.o src/game_over.o src/final.o
+	gcc src/main.o src/screen.o src/snake.o src/greetings.o src/main_menu.o  src/common.o src/game.o src/game_over.o src/final.o -o snake -lncurses
 
 src/main.o: src/main.c inc/screen.h inc/snake.h inc/common.h
 	gcc -Wall -Wextra -DNCURSES_STATIC -Iinc -c src/main.c -o src/main.o 
@@ -20,6 +20,9 @@ src/game.o: src/game.c inc/game.h inc/common.h
 
 src/game_over.o: src/game_over.c inc/game_over.h inc/common.h
 	gcc -Wall -Wextra -DNCURSES_STATIC -Iinc -c src/game_over.c -o src/game_over.o
+
+src/final.o: src/final.c inc/final.h inc/common.h
+	gcc -Wall -Wextra -DNCURSES_STATIC -Iinc -c src/final.c -o src/final.o
 
 src/snake.o: src/snake.c inc/snake.h inc/common.h
 	gcc -Wall -Wextra -DNCURSES_STATIC -Iinc -c src/snake.c -o src/snake.o

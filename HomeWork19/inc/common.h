@@ -37,3 +37,6 @@ typedef struct Screen{
     struct food_t* food_list;
 } Screen_t;
 
+
+void food_destruction(void);
+

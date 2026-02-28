@@ -41,4 +41,6 @@ void init_snake(struct Snake* my_snake, uint8_t snake_num);
 void move_snake(struct Snake* my_snake);
 uint8_t snake_self_collision(struct Snake* my_snake);
 uint8_t snake_vs_snake_collision(struct Snake* my_snake, struct Snake* other_snake);
-uint8_t grow_snake(struct Snake* my_snake);
+void grow_snake(struct Snake* my_snake);
+void tail_destruction(struct Snake* my_snake);
+void snake_destruction(struct Snake* my_snake);

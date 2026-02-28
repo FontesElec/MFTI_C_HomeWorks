@@ -218,6 +218,7 @@ activity_t main_menu_page(){
         attroff(A_REVERSE); 
         refresh();
     } 
+    ready_flg = 0;
 //=======================================================================================
     return GAME;
 }

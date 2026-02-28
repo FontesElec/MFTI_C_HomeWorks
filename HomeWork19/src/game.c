@@ -6,7 +6,8 @@
 #include <stdlib.h>
 
 
-#define FOOD_NUMS 3
+#define FOOD_NUMS     3
+#define POINTS_TO_WIN 20
 
 const char food_symbol[] = "*";
 
@@ -209,7 +210,7 @@ activity_t game_page(void){
         if(check_collisions()){
             //Игра заканчивается, когда очки падают до нуля
             while(s_ptr){
-                if(s_ptr->points == 0){
+                if((s_ptr->points == 0) || (s_ptr->points >= POINTS_TO_WIN)){
                     return GAME_OVER;
                 }
                 s_ptr = s_ptr->next;

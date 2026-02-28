@@ -162,11 +162,12 @@ uint8_t snake_self_collision(struct Snake* my_snake){
             //Уничтожаем отрезанный хвост
             while(t_ptr){
                 mvprintw(t_ptr->tail_y, t_ptr->tail_x, " ");
+                struct Tail* del_ptr = t_ptr;
                 t_ptr = t_ptr->next;
                 if(my_snake->points > 0){
                     my_snake->points--;
                 }
-                free(t_ptr);                
+                free(del_ptr);                
             }
             return 1;
         }
@@ -217,7 +218,7 @@ uint8_t snake_vs_snake_collision(struct Snake* my_snake, struct Snake* other_sna
     return 0;
 }
 
-uint8_t grow_snake(struct Snake* my_snake){
+void grow_snake(struct Snake* my_snake){
     my_snake->points++;
     uint16_t new_x = my_snake -> head_x, new_y = my_snake -> head_y;
     //смещаем голову
@@ -233,4 +234,17 @@ uint8_t grow_snake(struct Snake* my_snake){
     attroff(COLOR_PAIR(my_snake->color));
 }
 
-#warning TAIL DESTRUCTION NEEDED
+
+void tail_destruction(struct Snake* my_snake){
+    struct Tail* t_ptr = my_snake ->my_tail;
+    while(t_ptr){
+        struct Tail* del_ptr = t_ptr;
+        t_ptr = t_ptr -> next;
+        free(del_ptr);
+    }
+}
+
+void snake_destruction(struct Snake* my_snake){
+    tail_destruction(my_snake);
+    free(my_snake);
+}
