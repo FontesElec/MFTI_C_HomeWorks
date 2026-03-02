@@ -127,10 +127,16 @@ void move_snake(struct Snake* my_snake){
     attron(COLOR_PAIR(my_snake->color));
     mvprintw(my_snake->head_y, my_snake->head_x, my_snake->head_symbol);
 
-    //Отрисовка первого звена хвоста взамен головы
-    mvprintw(y_prev, x_prev, my_snake->tail_symbol);
-    
     struct Tail* t_ptr = my_snake->my_tail;
+    if(t_ptr){
+        //Отрисовка первого звена хвоста взамен головы
+        mvprintw(y_prev, x_prev, my_snake->tail_symbol);
+    }
+    else{
+        //Если нет хвоста, то затираем предыдущее обозначение головы
+        mvprintw(y_prev, x_prev, " ");
+    }
+    
 
     while(t_ptr){
         uint16_t x_cur = t_ptr->tail_x, y_cur = t_ptr->tail_y;
@@ -198,6 +204,10 @@ uint8_t snake_vs_snake_collision(struct Snake* my_snake, struct Snake* other_sna
             //Затираем ссылку на следующий сегмент
             if(prev_t_ptr){
                 prev_t_ptr->next = NULL;
+            }
+            //Если попали в первый же после головы сегмент
+            if(t_ptr == other_snake->my_tail){
+                other_snake->my_tail = NULL;
             }
             //Уничтожаем отрезанный хвост
             while(t_ptr){

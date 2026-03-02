@@ -34,6 +34,7 @@ static void s1_set_color(uint8_t param){
         }
     }
 }
+
 static void s2_set_color(uint8_t param){
     if(myScreen){
         if(!myScreen->snake_list){
@@ -50,8 +51,12 @@ static void s2_set_color(uint8_t param){
     }   
 }
 
+static void set_food_color(uint8_t param){
+    myScreen->food_color = param;
+}
+
 static void show_config(void){
-    mvvline(1, 74, '|', 8);
+    mvvline(1, 74, '|', 9);
     mvprintw(1,  76, "SELECTED CONFIGURATION:");
     mvprintw(3,  76, "SPEED:  %d", myScreen->speed);
     mvprintw(4,  76, "SNAKES: %d", myScreen->snakes);
@@ -60,7 +65,8 @@ static void show_config(void){
     }
     if(myScreen->snake_list && myScreen->snake_list->next){
         mvprintw(6, 76, "SNAKE 2 COLOR: %d", myScreen->snake_list->next->color);
-    }     
+    }
+    mvprintw(7, 76, "FOOD COLOR: %d", myScreen->food_color);     
     refresh();
 }
 
@@ -117,6 +123,14 @@ activity_t main_menu_page(){
     struct menu_obj snake_2_mag;
     struct menu_obj snake_2_cyan;
     struct menu_obj snake_2_white;
+    struct menu_obj food_color;
+    struct menu_obj food_red;
+    struct menu_obj food_green;
+    struct menu_obj food_yellow;
+    struct menu_obj food_blue;
+    struct menu_obj food_mag;
+    struct menu_obj food_cyan;
+    struct menu_obj food_white;
     struct menu_obj start_sign;
 
 //  NAME                              .text               .x  .y .style   .param          .right_id       .left_id        .upper_id       .lover_id       .next_id          .activity  
@@ -139,14 +153,22 @@ activity_t main_menu_page(){
     snake_1_cyan =  (struct menu_obj){"CYAN",              59, 5, COLORED, COLOR_CYAN,    &snake_1_white, &snake_1_mag,   &snake_1,       &snake_2_red,   &snake_1_white,   s1_set_color};
     snake_1_white = (struct menu_obj){"WHITE",             66, 5, COLORED, COLOR_WHITE,   &snake_1_red,   &snake_1_cyan,  &snake_1,       &snake_2_red,   &snake_2_color,   s1_set_color};
     snake_2_color = (struct menu_obj){"2nd snake color:",  1,  6, BOLD,    0,             NULL,           NULL,           NULL,           NULL,           &snake_2_red,     NULL};
-    snake_2_red =   (struct menu_obj){"RED",               19, 6, COLORED, COLOR_RED,     &snake_2_green, &snake_2_white, &snake_1_red,   &start_sign,    &snake_2_green,   s2_set_color};
-    snake_2_green = (struct menu_obj){"GREEN",             25, 6, COLORED, COLOR_GREEN,   &snake_2_yellow,&snake_2_red,   &snake_1_red,   &start_sign,    &snake_2_yellow,  s2_set_color};
-    snake_2_yellow =(struct menu_obj){"YELLOW",            33, 6, COLORED, COLOR_YELLOW,  &snake_2_blue,  &snake_2_green, &snake_1_red,   &start_sign,    &snake_2_blue,    s2_set_color};
-    snake_2_blue =  (struct menu_obj){"BLUE",              42, 6, COLORED, COLOR_BLUE,    &snake_2_mag,   &snake_2_yellow,&snake_1_red,   &start_sign,    &snake_2_mag,     s2_set_color};
-    snake_2_mag =   (struct menu_obj){"MAGENTA",           49, 6, COLORED, COLOR_MAGENTA, &snake_2_cyan,  &snake_2_blue,  &snake_1_red,   &start_sign,    &snake_2_cyan,    s2_set_color};
-    snake_2_cyan =  (struct menu_obj){"CYAN",              59, 6, COLORED, COLOR_CYAN,    &snake_2_white, &snake_2_mag,   &snake_1_red,   &start_sign,    &snake_2_white,   s2_set_color};
-    snake_2_white = (struct menu_obj){"WHITE",             66, 6, COLORED, COLOR_WHITE,   &snake_2_red,   &snake_2_cyan,  &snake_1_red,   &start_sign,    &start_sign,      s2_set_color};
-    start_sign =    (struct menu_obj){"START",             1,  8, BOLD,    0,             &start_sign,    &start_sign,    &snake_2_red,   &speed_1,       NULL,             ready_to_play};
+    snake_2_red =   (struct menu_obj){"RED",               19, 6, COLORED, COLOR_RED,     &snake_2_green, &snake_2_white, &snake_1_red,   &food_red,      &snake_2_green,   s2_set_color};
+    snake_2_green = (struct menu_obj){"GREEN",             25, 6, COLORED, COLOR_GREEN,   &snake_2_yellow,&snake_2_red,   &snake_1_red,   &food_red,      &snake_2_yellow,  s2_set_color};
+    snake_2_yellow =(struct menu_obj){"YELLOW",            33, 6, COLORED, COLOR_YELLOW,  &snake_2_blue,  &snake_2_green, &snake_1_red,   &food_red,      &snake_2_blue,    s2_set_color};
+    snake_2_blue =  (struct menu_obj){"BLUE",              42, 6, COLORED, COLOR_BLUE,    &snake_2_mag,   &snake_2_yellow,&snake_1_red,   &food_red,      &snake_2_mag,     s2_set_color};
+    snake_2_mag =   (struct menu_obj){"MAGENTA",           49, 6, COLORED, COLOR_MAGENTA, &snake_2_cyan,  &snake_2_blue,  &snake_1_red,   &food_red,      &snake_2_cyan,    s2_set_color};
+    snake_2_cyan =  (struct menu_obj){"CYAN",              59, 6, COLORED, COLOR_CYAN,    &snake_2_white, &snake_2_mag,   &snake_1_red,   &food_red,      &snake_2_white,   s2_set_color};
+    snake_2_white = (struct menu_obj){"WHITE",             66, 6, COLORED, COLOR_WHITE,   &snake_2_red,   &snake_2_cyan,  &snake_1_red,   &food_red,      &food_color,      s2_set_color};
+    food_color =    (struct menu_obj){"food color:",       1,  7, BOLD,    0,             NULL,           NULL,           NULL,           NULL,           &food_red,        NULL};
+    food_red =      (struct menu_obj){"RED",               19, 7, COLORED, COLOR_RED,     &food_green,    &food_white,    &snake_2_red,   &start_sign,    &food_green,      set_food_color};
+    food_green =    (struct menu_obj){"GREEN",             25, 7, COLORED, COLOR_GREEN,   &food_yellow,   &food_red,      &snake_2_red,   &start_sign,    &food_yellow,     set_food_color};
+    food_yellow =   (struct menu_obj){"YELLOW",            33, 7, COLORED, COLOR_YELLOW,  &food_blue,     &food_green,    &snake_2_red,   &start_sign,    &food_blue,       set_food_color};
+    food_blue =     (struct menu_obj){"BLUE",              42, 7, COLORED, COLOR_BLUE,    &food_mag,      &food_yellow,   &snake_2_red,   &start_sign,    &food_mag,        set_food_color};
+    food_mag =      (struct menu_obj){"MAGENTA",           49, 7, COLORED, COLOR_MAGENTA, &food_cyan,     &food_blue,     &snake_2_red,   &start_sign,    &food_cyan,       set_food_color};
+    food_cyan =     (struct menu_obj){"CYAN",              59, 7, COLORED, COLOR_CYAN,    &food_white,    &food_mag,      &snake_2_red,   &start_sign,    &food_white,      set_food_color};
+    food_white =    (struct menu_obj){"WHITE",             66, 7, COLORED, COLOR_WHITE,   &food_red,      &food_cyan,     &snake_2_red,   &start_sign,    &start_sign,      set_food_color};
+    start_sign =    (struct menu_obj){"START",             1,  8, BOLD,    0,             &start_sign,    &start_sign,    &food_red,      &speed_1,       NULL,             ready_to_play};
 
 //=========================================================================================================================================================================================
     

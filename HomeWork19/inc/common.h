@@ -33,6 +33,7 @@ typedef struct Screen{
     function_ptr activity[5];
     uint8_t snakes;
     uint8_t speed;
+    uint8_t food_color;
     struct Snake* snake_list;
     struct food_t* food_list;
 } Screen_t;

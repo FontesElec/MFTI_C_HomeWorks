@@ -4,10 +4,11 @@
 #include <time.h>
 #include <ncurses/ncurses.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 #define FOOD_NUMS     3
-#define POINTS_TO_WIN 20
+#define POINTS_TO_WIN 100
 
 const char food_symbol[] = "*";
 
@@ -36,6 +37,7 @@ static void all_snakes_init(void){
 static void food_spaming(void){
     food_t** addr_f_ptr = &(myScreen->food_list);
     food_t** prev_addr_f_ptr = NULL;
+    attron(COLOR_PAIR(myScreen->food_color));
     for(int i = 0; i < FOOD_NUMS; i++){
         *addr_f_ptr =  calloc(1, sizeof(food_t));
         if(prev_addr_f_ptr){
@@ -47,6 +49,7 @@ static void food_spaming(void){
         prev_addr_f_ptr = addr_f_ptr;
         addr_f_ptr = &((*addr_f_ptr)->next_food);
     }
+    attroff(COLOR_PAIR(myScreen->food_color));
     refresh();
 }
 
@@ -102,26 +105,75 @@ static uint8_t is_opposite_direction(direction_t my_dir, direction_t new_dir){
         case DIR_DOWN:  if(new_dir == DIR_UP)    return 1; break;
         case DIR_LEFT:  if(new_dir == DIR_RIGHT) return 1; break;
         case DIR_RIGHT: if(new_dir == DIR_LEFT)  return 1; break;
-        case NO_DIR: return 0; break;
+        case NO_DIR: return 1; break;
         default: return 0;
     }
     return 0;
+}
+
+
+//Добавление функций автопилота: поиск расстояния до еды
+static uint16_t distance(struct Snake* my_snake, food_t* food){
+    return (uint16_t)(abs(my_snake->head_x - food->food_x) + abs(my_snake->head_y - food->food_y));
+}
+
+
+//Добавление автопилота: простройка маршрута до ближайшей еды
+static void auto_change_direction(struct Snake* my_snake, food_t* food_list){
+    food_t* f_ptr = food_list; 
+    food_t* nearest_food = food_list;
+    uint16_t min_dist = 0xffff;
+    uint16_t cur_dist = 0;
+
+    //поиск ближайшей еды
+    while(f_ptr){
+        cur_dist = distance(my_snake, f_ptr);
+        if(cur_dist < min_dist){
+            nearest_food = f_ptr;
+            min_dist = cur_dist; 
+        }
+        f_ptr = f_ptr->next_food;
+    }
+
+    //маневрирование
+    switch (my_snake->direction){
+        case DIR_LEFT: case DIR_RIGHT:{
+            if(my_snake->head_y != nearest_food->food_y){
+                my_snake->direction = (my_snake->head_y > nearest_food->food_y) ? DIR_UP : DIR_DOWN;
+            }
+        } break;
+        case DIR_UP: case DIR_DOWN:{
+            if(my_snake->head_x != nearest_food->food_x){
+                my_snake->direction = (my_snake->head_x > nearest_food->food_x) ? DIR_LEFT : DIR_RIGHT; 
+            }
+        }
+        default: break;
+    }
+
 }
 
 //Смена направления
 static void change_direction(int key){
     struct Snake* s_ptr = myScreen->snake_list;
     uint8_t num_of_snake = 1;
-    while((s_ptr) && (num_of_snake <= myScreen->snakes)){
-        direction_t new_dir =  is_my_direction(key, s_ptr);
-        if((new_dir != NO_DIR) && (!is_opposite_direction(s_ptr->direction, new_dir))){
-            s_ptr->direction = new_dir;
-            return;
+    while(s_ptr){
+        if(num_of_snake <= myScreen->snakes){
+            direction_t new_dir =  is_my_direction(key, s_ptr);
+            if((new_dir != NO_DIR) && (!is_opposite_direction(s_ptr->direction, new_dir))){
+                s_ptr->direction = new_dir;
+                return;
+            }
+        }
+        //Если змеек больше чем задано при старте игры, то крайние будут управляться автоматически
+        else{
+            auto_change_direction(s_ptr, myScreen->food_list);
         }
         num_of_snake++;
         s_ptr = s_ptr->next;
     }
 }
+
+
 
 static uint8_t check_self_collisions(){
     uint8_t collisions = 0;
@@ -221,16 +273,17 @@ activity_t game_page(void){
                 food_spaming();
             }            
         }
+
         ch = getch();
 
         switch (ch){
-            case 0: break;
-            case EXIT_KEY: return FINAL;
-            case 'q': case 'Q': case 1081: case 1049: return GAME_OVER;
+            //case 0: break;
+            case EXIT_KEY: return FINAL; break;
+            case 'q': case 'Q': case 1081: case 1049: return GAME_OVER; break;
             default: change_direction(ch);
         }
         ch = 0;
-        c_delay_ms(200 / myScreen->speed);
+        c_delay_ms(300 / myScreen->speed);
     }
     return GAME_OVER;
 }

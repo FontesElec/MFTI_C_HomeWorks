@@ -24,6 +24,7 @@ Screen_t* new_screen(void){
     new_screen.snakes = 1;
     new_screen.snake_list = NULL;
     new_screen.speed = 1;
+    new_screen.food_color = COLOR_WHITE;
     //создание мест под две змеи по умолчанию
     new_screen.snake_list = calloc(1, sizeof(struct Snake));
     new_screen.snake_list->next = calloc(1, sizeof(struct Snake));

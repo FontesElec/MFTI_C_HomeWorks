@@ -41,12 +41,13 @@ activity_t game_over_page(void){
     refresh();
 
     nodelay(stdscr, FALSE);
-    int ch = getch();
+    int ch;
     while(1){
+        ch = getch();
         switch (ch){
             case EXIT_KEY:                              return FINAL; break;
             case 'q': case 'Q': case 1081: case 1049:   return MAIN_MENU; break;
-            default: break;
+            default: continue;
         }
     }   
     return EXIT;
