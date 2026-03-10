@@ -35,20 +35,9 @@ float root(func f, func g, func df, func dg, float a, float b, float eps1){
         Учитываем что производная разности функций равна равности их производных
     */
 
-    //Для определения, с какой стороны от предела начинать поиск, определимся со знаком производной
-    float dfg = dg(a) - df(a);
-
-    float x = 0, end_x = 0;
+    float x = a;
+    float end_x = b;
     int cntr = 0;
-    
-    if(dfg < 0){
-        x = a;
-        end_x = b;
-    }
-    else{
-        x = b;
-        end_x = a;
-    }
 
     float x1 = x - (g(x) - f(x)) / (dg(x) - df(x));
     float x0 = x;
@@ -62,16 +51,37 @@ float root(func f, func g, func df, func dg, float a, float b, float eps1){
     return x1;
 }
 
+float integral(func f, float a, float b, float eps2){
+    float sum = 0;
+    float step = (b - a) / eps2;
+    for(float x = a + eps2; x < b - eps2; x += eps2){
+        sum += 0.5 * eps2 * (f(x) + f(x + eps2));
+    }
+    printf("calculated square: %f \n", sum);
+    return sum;
+}
+
 
 int main(void){
-    float x = 0;
-    x = root(hyperbolic, linear, deriv_hyperbolic, deriv_linear, 0.2, 10, 0.0001);
-    printf("1st func root: %f \n", x);
+    float x1 = 0, x2 = 0, x3 = 0;
+    x1 = root(hyperbolic, linear, deriv_hyperbolic, deriv_linear, 0.2, 10, 0.0001);
+    printf("1st func root: %f \n", x1);
     
-    x = root(hyperbolic, powered, deriv_hyperbolic, deriv_powered, 0.2, 10, 0.0001);
-    printf("2nd func root: %f \n", x);
+    x2 = root(hyperbolic, powered, deriv_hyperbolic, deriv_powered, 0.2, 10, 0.0001);
+    printf("2nd func root: %f \n", x2);
 
-    x = root(linear, powered, deriv_linear, deriv_powered, 0.2, 10, 0.0001);
-    printf("3rd func root: %f \n", x);
+    x3 = root(linear, powered, deriv_linear, deriv_powered, 0.2, 10, 0.0001);
+    printf("3rd func root: %f \n", x3);
     
+    /*
+        Ограничение сверху фигуры происходит за счёт лиейной функции, соответственно, 
+        её площадь является базовой, из неё вычтем площади фигур,
+        ограниченных гиперболой и степенной функцией
+    */
+    float S1 = integral(linear, x1, x3, 0.0001);
+    float S2 = integral(hyperbolic, x1, x2, 0.0001);
+    float S3 = integral(powered, x2, x3, 0.0001);
+
+    printf("Current square of figure is %f \n", (S1 - S2 - S3));
+
 }
