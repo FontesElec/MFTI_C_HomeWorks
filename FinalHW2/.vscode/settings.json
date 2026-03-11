@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "d:\\MFTI_C_HomeWorks\\FinalHW2",
+            "binaryPath": "d:\\MFTI_C_HomeWorks\\FinalHW2\\square_calc",
+            "binaryArgs": []
+        }
+    ]
+}
